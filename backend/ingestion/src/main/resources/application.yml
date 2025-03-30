@@ -1,0 +1,36 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/taxiride
+    username: postgres
+    password: secret
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+
+    queues:
+      rideQueue: rides.queue
+      deadLetterQueue: rides.dlq
+
+    exchange:
+      rideExchange: rides.exchange
+
+    routing:
+      rideRoutingKey: rides.routing.key
+      deadLetterRoutingKey: rides.dlq.routing.key
+
+  application:
+    name: ingestion-service

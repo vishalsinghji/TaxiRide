@@ -1,0 +1,33 @@
+version: "1.0"
+
+services:
+  backend:
+    build: .
+    container_name: taxi_backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/taxiride
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=secret
+    depends_on:
+      - db
+    networks:
+      - app_network
+
+  db:
+    image: postgres:latest
+    container_name: postgres_db
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=taxiride
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge

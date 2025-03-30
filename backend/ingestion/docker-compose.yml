@@ -1,0 +1,50 @@
+version: '1.0'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_DB: taxiride
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"  # RabbitMQ broker
+      - "15672:15672" # RabbitMQ management UI
+
+  # Spring Boot Application
+  ingestion-service:
+    build: .
+    container_name: ingestion-service
+    restart: always
+    depends_on:
+      - postgres
+      - rabbitmq
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/taxiride
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: secret
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      JSON_FILE_PATH: /app/taxi_records.json  # Pass JSON file path as an environment variable
+    volumes:
+          - ./data.json:/app/taxi_records.json
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
